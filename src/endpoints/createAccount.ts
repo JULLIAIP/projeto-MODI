@@ -1,37 +1,53 @@
 import { Request, Response } from "express";
-import { Account } from "../class/Account"
-import fs from 'fs';
+import { Account } from "../types/typesBank";
+import { crud } from "../crud";
 
 export const createAccount = (req: Request, res: Response) => {
 
-    const accounts: Account[] = []
+    let status = 0;
+    let messagem = "";
+
     try {
         const { name, cpf, birthDate } = req.body
 
+        const accounts: Account[] = crud.accounts;
+
+        const today = new Date().toString()
+
         //verificando se ja existe conta com o cpf informado
         const duplicateAccount: Account | undefined = accounts.find(
-            (account) => account.getCpf() === cpf
+            (account) => account.cpf === cpf
         )
+        
         if (duplicateAccount) {
+            status = 422
+            messagem = "Esse cpf já existe"
             throw new Error()
         }
 
         //verificando idade
         const age: number = Number(birthDate)
         if (age < 18) {
+            status = 422
+            messagem = "você precisar ter mais de 18 anos"
             throw new Error()
         }
 
+        const newAccount: Account = {
+            name,
+            cpf,
+            birthDate,
+            balance: 0,
+            transactions: []
+        }
 
-        accounts.push(
-            new Account(name, cpf, birthDate)
-        )
+        crud.createAccount(newAccount)
 
-        fs.writeFileSync('src/data.json', JSON.stringify(accounts, null, 2))
         res.send("Conta criada com sucesso!")
+
     } catch (error) {
 
-        res.send("ocorreu algum erro").status(500).end()
+        res.send(messagem).status(status).end()
 
     }
 
