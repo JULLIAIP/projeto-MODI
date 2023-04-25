@@ -1,22 +1,21 @@
 import { Request, Response } from "express";
 import { CRUD } from "../crud";
 
-export const updateAcount = (req: Request, res: Response) => {
+
+export const RemoveBalance = (req: Request, res: Response) => {
     let status = 200;
     let message = 'Operação concluída com sucesso '
     try {
-        const { cpf } = req.params
-        const { newName } = req.body
+        const cpf = req.params.cpf
 
-        const result = CRUD.updateAcount(cpf, newName)
+        const result = CRUD.upDateRemoveBalance(cpf)
 
         if (!result) {
             status = 404;
-            message = "Não existe uma conta com esse cpf"
+            message = "Não existe uma conta com esse cpf ou a conta está zerada"
             throw new Error()
         }
-
-        res.send(message).status(status).end()
+        res.send(`Valor sacado: ${result}`).status(status).end()
     } catch (error) {
         res.send(message).status(status).end()
     }

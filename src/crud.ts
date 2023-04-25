@@ -1,23 +1,83 @@
-import fs from "fs"
-import { Account, Transaction } from "./types/typesBank"
+import fs from "fs";
+import { Account, Transaction } from "./types";
+import { basename } from "path";
 
-const file = () => {
-    const data = fs.readFileSync('src/data.json', 'utf-8')
-    return JSON.parse(data)
+const writeInDB = (data: Account) => {
+    fs.writeFileSync('src/account.json', JSON.stringify(data, null, 2))
 }
 
-export const crud = {
+export const CRUD = {
 
-    accounts: file(),
+    account: JSON.parse(fs.readFileSync('src/account.json', 'utf-8')),
 
-    getAccount(name: string, cpf: string) {
-
-        const userAccount: Account | undefined = this.accounts.find(
-            (acount: Account) => acount.cpf === cpf && acount.name === name)
-
-        return userAccount
+    getAccountByCpf(cpf: string): Account | undefined {
+        return this.account.find((count: Account) => count.cpf === cpf)
     },
-    getBalance( cpf: string) {
+    createAccount(newAccount: Account) {
+        //desafio
+        const duplicateCpf = this.getAccountByCpf(newAccount.cpf)
+        if (duplicateCpf) {
+            return false
+        }
+
+        this.account.push(newAccount)
+        fs.writeFileSync('src/account.json', JSON.stringify(this.account, null, 2))
+
+        return true
+    },
+    updateAcount(cpf: string, newName: string) {
+
+        const upDateItem = this.account.find((count: Account) => count.cpf === cpf)
+
+        if (upDateItem) {
+            upDateItem.name = newName
+            fs.writeFileSync('src/account.json', JSON.stringify(this.account, null, 2))
+            return true
+        } else {
+            return false
+        }
+    },    
+    deleteAccount(cpf: string) {
+        //desafio
+        const checaSaldo = this.getAccountByCpf(cpf)
+
+        if (checaSaldo != undefined && checaSaldo.balance > 0) {
+            return [`Você precisa sacar ${checaSaldo.balance} a conta antes de apaga-la`, 400]
+        }
+
+        const removeItem = this.account.findIndex((count: Account) => count.cpf === cpf);
+
+        if (removeItem < 0) {
+            return false
+        }
+
+        this.account.splice(removeItem, 1)
+
+        fs.writeFileSync('src/account.json', JSON.stringify(this.account, null, 2))
+
+        return true
+    },
+    addTransaction(cpf: string, newTransaction: Transaction) {
+
+        const addTransactionItem = this.getAccountByCpf(cpf)
+        if (addTransactionItem) {
+
+            addTransactionItem.transactions.push(newTransaction)
+
+            //desafio 1 
+            addTransactionItem.balance = addTransactionItem.balance + newTransaction.value
+            //
+
+            fs.writeFileSync('src/account.json', JSON.stringify(this.account, null, 2))
+
+            return true
+        } else {
+            return false
+        }
+
+
+    },
+    getBalance(cpf: string) {
 
         const extrato = {
             saldo: 0,
@@ -25,11 +85,12 @@ export const crud = {
             saidas: 0
         }
 
-        const userAccount: Account | undefined = this.accounts.find(
-            (acount: Account) => acount.cpf === cpf)
+        const userAccount = this.getAccountByCpf(cpf)
+
 
         extrato.saldo = Number(userAccount?.balance)
 
+        //Desafio - imprimir extrato detalhado
         userAccount?.transactions.forEach((transaction) => {
 
             if (transaction.type === 'entrada') {
@@ -42,52 +103,24 @@ export const crud = {
 
         return (extrato)
     },
-    createAccount(newAccount: Account) {
+    upDateRemoveBalance(cpf: string) {
 
-        this.accounts.push(newAccount)
+        const saque = Number(this.getAccountByCpf(cpf)?.balance)
 
-        fs.writeFileSync('src/data.json', JSON.stringify(this.accounts, null, 2))
+        const newTransaction: Transaction = {
+            date: new Date().toString(),
+            desc: "Fechamento da conta",
+            type: "saida",
+            value: -saque
+        }
 
-    },
-    upDateAccount(newName: string, cpf: string) {
+        this.addTransaction(cpf, newTransaction)
 
-        this.accounts.forEach((account: Account) => {
-
-            if (account.cpf === cpf) {
-                account.name = newName
-            }
-        })
-
-        fs.writeFileSync('src/data.json', JSON.stringify(this.accounts, null, 2))
-
-
-    },
-    addTransation(newTransaction: Transaction, cpf: string) {
-
-        this.accounts.forEach((account: Account) => {
-            if (account.cpf === cpf) {
-                account.transactions.push(
-                    newTransaction
-                )
-                //atualilzando o saldo
-                account.balance = account.balance + newTransaction.value
-
-            }
-        })
-
-        fs.writeFileSync('src/data.json', JSON.stringify(this.accounts, null, 2))
-
-    },
-    deleteAccount(cpf: string) {
-
-        const itemRemove = this.accounts.findIndex((item: any) => item.cpf === cpf)
-
-        if (itemRemove >= 0) {
-            this.accounts.splice(itemRemove, 1)
-            fs.writeFileSync('src/data.json', JSON.stringify(this.accounts, null, 2))
-            return true
-        } else {
+        if (!saque || saque < 0) {
             return false
         }
+
+        return saque
+
     }
 }

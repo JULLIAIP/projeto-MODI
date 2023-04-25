@@ -1,24 +1,33 @@
-import { Request, Response } from "express"
-import { crud } from "../crud";
+import { Request, Response } from "express";
+import { CRUD } from "../crud";
+import { Account } from "../types";
 
 export const getAccount = (req: Request, res: Response) => {
 
+    let status = 200;
+    let message = "Operação finalizada com sucesso"
     try {
-        const { name, cpf } = req.query;
 
-        const account = crud.getAccount(name as string, cpf as string)
-''
-        if (!account) {
- 
+        const cpf = req.query.cpf as string
+
+        if (!cpf) {
+            status = 404
+            message ='você precisa informar o CPF'
             throw new Error()
         }
 
-        res.send(account)
+        const result: Account | undefined = CRUD.getAccountByCpf(cpf)
+
+        if (!result) {
+            status = 404
+            message ='CPF NÃO ENCONTRADO [ ]'
+            throw new Error()
+        }
+
+        res.send(result).status(200).end()
 
     } catch (error) {
-        res.send("usuário nao encontrado")
+
+        res.send(message).status(status).end()
     }
-
-
-
 }
