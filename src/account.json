@@ -1,0 +1,30 @@
+[
+  {
+    "name": "jullia",
+    "cpf": "701",
+    "birthDate": "Mon Jun 09 1997 00:00:00 GMT-0300 (Horário Padrão de Brasília)",
+    "balance": 0,
+    "transactions": []
+  },
+  {
+    "name": "jullia",
+    "cpf": "801",
+    "birthDate": "Sat Sep 06 1997 00:00:00 GMT-0300 (Horário Padrão de Brasília)",
+    "balance": 0,
+    "transactions": []
+  },
+  {
+    "name": "jullia",
+    "cpf": "901",
+    "birthDate": "Sat Sep 06 1997 00:00:00 GMT-0300 (Horário Padrão de Brasília)",
+    "balance": 0,
+    "transactions": []
+  },
+  {
+    "name": "jullia",
+    "cpf": "511",
+    "birthDate": "Invalid Date",
+    "balance": 0,
+    "transactions": []
+  }
+]

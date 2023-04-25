@@ -1,56 +1,62 @@
+
 import { Request, Response } from "express";
-import { Account } from "../types/typesBank";
-import { crud } from "../crud";
+import { Account } from "../types";
+import { CRUD } from "../crud";
 
 export const createAccount = (req: Request, res: Response) => {
 
-    let status = 0;
-    let messagem = "";
+    let status = 200;
+    let message = 'Transação concluída com sucesso'
 
     try {
+
         const { name, cpf, birthDate } = req.body
+        const convertDate = new Date(birthDate)
+        const today = new Date()
 
-        const accounts: Account[] = crud.accounts;
+        //confere dados da requisição 
 
-        const today = new Date().toString()
-
-        //verificando se ja existe conta com o cpf informado
-        const duplicateAccount: Account | undefined = accounts.find(
-            (account) => account.cpf === cpf
-        )
-        
-        if (duplicateAccount) {
-            status = 422
-            messagem = "Esse cpf já existe"
+        if (!name || !cpf || !birthDate) {
+            status = 422;
+            message = "Você precisa informar no body : name, cpf e birthDate"
             throw new Error()
         }
 
-        //verificando idade
-        const age: number = Number(birthDate)
-        if (age < 18) {
-            status = 422
-            messagem = "você precisar ter mais de 18 anos"
+        //confere idade
+        let year = today.getFullYear() - convertDate.getFullYear()
+        const month = today.getMonth() - convertDate.getMonth()
+        const day = today.getDate() - convertDate.getDate()
+
+        if (month < 0 || month === 0 && day < 0) {
+            year--
+        }
+
+        if (year < 18) {
+            status = 400;
+            message = "Você precisa ter mais de 18 anos para abrir uma conta"
             throw new Error()
         }
+
 
         const newAccount: Account = {
             name,
             cpf,
-            birthDate,
+            birthDate: convertDate.toString(),
             balance: 0,
             transactions: []
         }
+        const result = CRUD.createAccount(newAccount)
+        if (!result) {
+            status = 400;
+            message = "Já existe uma conta com esse cpf"
+            throw new Error()
+        }
 
-        crud.createAccount(newAccount)
-
-        res.send("Conta criada com sucesso!")
+        res.send(message).status(status).end()
 
     } catch (error) {
 
-        res.send(messagem).status(status).end()
+        res.send(message).status(status).end()
 
     }
-
-
-
 }

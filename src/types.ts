@@ -1,6 +1,6 @@
 
 export type Transaction = {
-    type : "entrada"| "saida",
+    type: "entrada" | "saida",
     value: number,
     desc: string,
     date: string

@@ -1,16 +1,19 @@
-import { addTransaction } from './endpoints/addTransaction';
-import { app } from "./app";
-import { createAccount } from "./endpoints/createAccount";
-import { getAccount } from "./endpoints/getAccount";
-import { getBalance } from "./endpoints/getBalance";
-import { upDateAccount } from './endpoints/upDateAccount';
-import { deleteAccount } from './endpoints/deleteAccount';
+import { app } from "./app"
+import { RemoveBalance } from "./endpoints/RemoveBalance"
+import { addNewTransaction } from "./endpoints/addNewTransaction"
+import { createAccount } from "./endpoints/createAccount"
+import { deleteAccount } from "./endpoints/deleteAccount"
+import { getAccount } from "./endpoints/getAccount"
+import { getBalance } from "./endpoints/getBalace"
+import { updateAcount } from "./endpoints/upDateAccount"
+
 
 app.get("/account", getAccount)
 app.post("/account", createAccount)
-app.put("/account", upDateAccount) // so é permitido alterar o nome
-app.delete("/account/:cpf", deleteAccount)// apaga a partir do cpf
+app.put("/account/:cpf", updateAcount)
+app.delete("/account/:cpf", deleteAccount)
 
+app.get("/account/:cpf/balance", getBalance)
+app.put("/account/:cpf/transaction", addNewTransaction)
+app.put("/account/:cpf/saque", RemoveBalance)
 
-app.get("/account/balance", getBalance)
-app.post("/:cpf/transaction", addTransaction)
